@@ -203,11 +203,13 @@ function queueInput(char) {
     if (char && char.length > 0) {
         const charCode = char.charCodeAt(0);
         SimState.inputQueue.push(charCode);
+        let fgiWasSet = false;
         
         // If CPU is waiting for input, provide it immediately from queue
         if (SimState.cpu.waitingForInput && SimState.inputQueue.length > 0) {
             const code = SimState.inputQueue.shift();
             SimState.cpu.setInput(code);
+            fgiWasSet = true;
             // Don't auto-resume - let user control execution
             // User can click Run or Step to continue
         } else if (!SimState.cpu.waitingForInput) {
@@ -217,10 +219,15 @@ function queueInput(char) {
                 // Auto-feed first character from queue to INPR and set FGI
                 const code = SimState.inputQueue.shift();
                 SimState.cpu.setInput(code);
+                fgiWasSet = true;
             }
         }
         
         updateIODisplay();
+        // Update UI to show FGI flag if it was just set
+        if (fgiWasSet) {
+            updateUI();
+        }
     }
 }
 

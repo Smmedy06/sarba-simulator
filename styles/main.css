@@ -98,14 +98,15 @@ body {
 }
 
 .brand-icon {
-    width: 28px;
-    height: 28px;
-    background: var(--color-bg-code);
+    width: 32px;
+    height: 32px;
+    background: transparent;
     color: white;
-    border-radius: 6px;
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
+    /* Blue bubble is now part of the SVG itself */
 }
 
 .controls-area {

@@ -283,10 +283,12 @@ function submitModalInput() {
         if (SimState.cpu.waitingForInput) {
             SimState.cpu.setInput(char.charCodeAt(0));
             updateIODisplay();
+            updateUI(); // Update UI to show FGI flag is now true
             // Don't auto-resume - let user control execution
         } else {
             // CPU not waiting - add to queue (which will set FGI if queue was empty)
             queueInput(char);
+            updateUI(); // Update UI to show FGI flag if it was set
         }
         hideInputModal();
     } else {

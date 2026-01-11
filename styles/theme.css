@@ -1,0 +1,52 @@
+/* Theme Variables - Modern Engineering Workbench */
+:root {
+    /* Color Palette */
+    --bg-app: #f4f6f8;            /* Light gray background for the app frame */
+    --bg-panel: #ffffff;          /* White for panels */
+    --bg-code: #0d1117;           /* Github Dark for code editor */
+    
+    --text-primary: #1f2937;      /* Dark gray for main text */
+    --text-secondary: #6b7280;    /* Muted gray for labels */
+    --text-code: #e6edf3;         /* Light code text */
+    
+    --accent-primary: #2563eb;    /* Professional Blue (Primary Action) */
+    --accent-hover: #1d4ed8;      /* Darker Blue */
+    --accent-success: #10b981;    /* Green for Success/Run */
+    --accent-warning: #f59e0b;    /* Amber for Stepping/Pause */
+    --accent-error: #ef4444;      /* Red for Errors/Stop */
+    
+    --border-light: #e5e7eb;      /* Light border */
+    --border-focus: #2563eb;      /* Focused input border */
+
+    /* Typography */
+    --font-heading: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+    
+    /* Spacing & Layout */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    
+    /* Syntax Highlighting (for potential overlay) */
+    --syntax-comment: #8b949e;
+    --syntax-keyword: #ff7b72;
+    --syntax-variable: #79c0ff;
+    --syntax-number: #d2a8ff;
+}
+
+/* Dark Mode Support (Class-based or System preference) */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-app: #0f172a;        /* Deep slate */
+        --bg-panel: #1e293b;      /* Panel slate */
+        --bg-code: #0f172a;       /* Code bg matches app in dark mode */
+        
+        --text-primary: #f8fafc;
+        --text-secondary: #94a3b8;
+        
+        --border-light: #334155;
+    }
+}

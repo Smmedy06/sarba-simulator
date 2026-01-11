@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SARBA Simulator</title>
+    <!-- Fonts managed in CSS import -->
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+
+<body>
+
+    <!-- Header -->
+    <header class="app-header">
+        <div class="brand">
+            <div class="brand-icon">
+                <!-- SARBA Simulator Logo - Compiler/Assembler Style -->
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Terminal/Code window frame -->
+                    <rect x="3" y="4" width="18" height="16" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.5"/>
+                    <!-- Terminal title bar -->
+                    <rect x="3" y="4" width="18" height="3" fill="currentColor" opacity="0.2"/>
+                    <!-- Code lines representing assembly -->
+                    <line x1="6" y1="9" x2="12" y2="9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <line x1="6" y1="12" x2="15" y2="12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <line x1="6" y1="15" x2="10" y2="15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <!-- SS monogram overlay -->
+                    <text x="18" y="18" font-family="monospace" font-size="8" font-weight="bold" fill="currentColor" opacity="0.6">SS</text>
+                </svg>
+            </div>
+            <span>SARBA Simulator</span>
+        </div>
+        <div class="controls-area">
+            <button id="btn-reset" class="btn btn-outline" disabled>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                    <path d="M3 3v5h5"></path>
+                </svg>
+                Reset
+            </button>
+            <button id="btn-step" class="btn btn-outline" disabled>
+                <!-- Step Micro (Simple Arrow) -->
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+                Step (Micro)
+            </button>
+            <button id="btn-step-inst" class="btn btn-outline" disabled>
+                <!-- Step Instr (Fast Forward >>) -->
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="13 19 22 12 13 5 13 19"></polygon>
+                    <polygon points="2 19 11 12 2 5 2 19"></polygon>
+                </svg>
+                Step (Instr)
+            </button>
+            <button id="btn-run" class="btn btn-primary" disabled>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+                Run
+            </button>
+            <button id="btn-stop" class="btn btn-outline hidden">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="6" y="4" width="4" height="16"></rect>
+                    <rect x="14" y="4" width="4" height="16"></rect>
+                </svg>
+                Stop
+            </button>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="tab-nav">
+        <button class="tab-btn active" data-target="tab-editor">Code Editor</button>
+        <button class="tab-btn" data-target="tab-sim">Simulator</button>
+    </nav>
+
+    <!-- Main Workspace -->
+    <main class="workspace">
+
+        <!-- EDITOR TAB -->
+        <div id="tab-editor" class="tab-pane active">
+            <div class="editor-layout">
+                <div class="editor-card">
+                    <div class="editor-toolbar" style="justify-content:space-between;">
+                        <span>source.asm</span>
+                        <button id="btn-assemble" class="btn btn-primary" style="height:26px; font-size:12px;">
+                            <!-- Assemble Icon -->
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2">
+                                <polyline points="16 18 22 12 16 6"></polyline>
+                                <polyline points="8 6 2 12 8 18"></polyline>
+                            </svg>
+                            Assemble
+                        </button>
+                    </div>
+                    <div class="code-wrapper">
+                        <textarea id="assembly-editor" class="code-input" spellcheck="false" placeholder="Enter your assembly code here..."></textarea>
+                    </div>
+                </div>
+
+                <div class="editor-card">
+                    <div class="status-panel">
+                        <div class="status-header">Build Output</div>
+                        <!-- Button Moved to Header -->
+                        <div id="log-panel" class="log-box">
+                            <div class="log-message">System Ready.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SIMULATOR TAB -->
+        <div id="tab-sim" class="tab-pane">
+            <div class="sim-layout">
+                <!-- Controls Sidebar -->
+                <aside class="sim-controls">
+
+                    <!-- MICRO-OP PANEL (Separated) -->
+                    <div class="info-card" style="box-shadow:0 2px 4px rgba(79,70,229,0.1); border-color:#c7d2fe;">
+                        <div class="card-title" style="color:#4f46e5;">CURRENT MICRO-OP</div>
+                        <div id="lbl-micro-op"
+                            style="font-family:'JetBrains Mono'; font-size:13px; color:#1e293b; font-weight:600; min-height:16px;">
+                            Ready
+                        </div>
+                    </div>
+
+                    <!-- TIMING PANEL -->
+                    <div class="info-card">
+                        <div class="card-title">Sequence & Timing</div>
+                        <div class="timing-grid">
+                            <div id="led-t0" class="led-indicator">T0</div>
+                            <div id="led-t1" class="led-indicator">T1</div>
+                            <div id="led-t2" class="led-indicator">T2</div>
+                            <div id="led-t3" class="led-indicator">T3</div>
+                            <div id="led-t4" class="led-indicator">T4</div>
+                            <div id="led-t5" class="led-indicator">T5</div>
+                            <div id="led-t6" class="led-indicator">T6</div>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="card-title">Registers</div>
+                        <div class="reg-grid">
+                            <div class="reg-item"><span class="reg-name">DR (Data)</span><span id="reg-dr"
+                                    class="reg-value">0000</span></div>
+                            <div class="reg-item"><span class="reg-name">AC (Accum)</span><span id="reg-ac"
+                                    class="reg-value">0000</span></div>
+                            <div class="reg-item"><span class="reg-name">AR (Addr)</span><span id="reg-ar"
+                                    class="reg-value">000</span></div>
+                            <div class="reg-item"><span class="reg-name">PC (Prog)</span><span id="reg-pc"
+                                    class="reg-value">000</span></div>
+                            <div class="reg-item"><span class="reg-name">IR (Instr)</span><span id="reg-ir"
+                                    class="reg-value">0000</span></div>
+                            <div class="reg-item"><span class="reg-name">TR (Temp)</span><span id="reg-tr"
+                                    class="reg-value">0000</span></div>
+                            <!-- IO -->
+                            <div class="reg-item"><span class="reg-name">INPR</span><span id="reg-inpr"
+                                    class="reg-value">00</span></div>
+                            <div class="reg-item"><span class="reg-name">OUTR</span><span id="reg-outr"
+                                    class="reg-value">00</span></div>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="card-title">Flags</div>
+                        <div class="flags-grid">
+                            <div id="flag-e" class="flag-item" title="Carry (E)">E</div>
+                            <div id="flag-i" class="flag-item" title="Indirect (I)">I</div>
+                            <div id="flag-s" class="flag-item" title="Start/Stop (S)">S</div>
+                            <div id="flag-r" class="flag-item" title="Interrupt Request (R)">R</div>
+                            <div id="flag-ien" class="flag-item" title="Interrupt Enable">IEN</div>
+                            <div id="flag-fgi" class="flag-item" title="Input Flag">FGI</div>
+                            <div id="flag-fgo" class="flag-item" title="Output Flag">FGO</div>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- MEMORY CARD -->
+                <div class="mem-card-container" style="height:100%; overflow:hidden;">
+                    <div class="mem-card">
+                        <div class="mem-toolbar">
+                            <div class="mem-actions" style="margin-left:0; width:100%; justify-content:space-between;">
+                                <div style="display:flex; align-items:center;">
+                                    <div style="font-weight:600; font-size:14px; color:#0f172a; margin-right:16px;">
+                                        Memory Map</div>
+                                    <div class="btn-group">
+                                        <button class="mem-btn active" data-fmt="hex">HEX</button>
+                                        <button class="mem-btn" data-fmt="dec">DEC</button>
+                                        <button class="mem-btn" data-fmt="bin">BIN</button>
+                                    </div>
+                                </div>
+                                <div style="display:flex; align-items:center;">
+                                    <input type="text" id="mem-goto" placeholder="Go to Hex..." class="mem-input">
+                                    <label class="toggle-switch">
+                                        <input type="checkbox" id="mem-show-all">
+                                        <span class="toggle-label">Show All</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mem-body-wrapper">
+                            <table class="mem-table">
+                                <thead>
+                                    <tr>
+                                        <th style="width:100px;">Address</th>
+                                        <th style="width:150px;">Content</th>
+                                        <th>Disassembly / Label</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="memory-tbody">
+                                    <!-- JS Populated -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Trace Modal -->
+        <div class="modal-overlay" id="trace-modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <span class="modal-title">Instruction Trace</span>
+                    <button class="modal-close" onclick="closeTraceModal()">&times;</button>
+                </div>
+                <div class="trace-table-container">
+                    <table class="trace-table">
+                        <thead>
+                            <tr>
+                                <th>Phase</th>
+                                <th>Timing</th>
+                                <th>Operation</th>
+                                <th>IR</th>
+                                <th>AC</th>
+                                <th>DR</th>
+                                <th>PC</th>
+                                <th>AR</th>
+                                <th>M[AR]</th>
+                                <th>E</th>
+                            </tr>
+                        </thead>
+                        <tbody id="trace-tbody">
+                            <!-- JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- I/O Floating Bubble -->
+    <button id="io-bubble" class="io-bubble" type="button" aria-label="Open I/O Console">I/O</button>
+
+    <!-- I/O Floating Modal -->
+    <div id="io-modal" class="io-floating-modal">
+        <div class="io-modal-header">
+            <span class="io-modal-title">Input / Output Console</span>
+            <button id="io-modal-close" class="io-modal-close">&times;</button>
+        </div>
+        <div class="io-modal-body">
+            <!-- Input Section -->
+            <div class="io-section">
+                <label class="io-label">Input</label>
+                <div class="io-input-row">
+                    <input type="text" id="io-input" class="io-input-field" placeholder="Type character..." maxlength="1">
+                    <button id="io-input-send" class="btn btn-primary btn-sm">Send</button>
+                </div>
+                <div class="io-queue-display">
+                    <span class="io-queue-label">Queue:</span>
+                    <span id="io-queue" class="io-queue-content">(empty)</span>
+                    <button id="io-input-clear" class="io-clear-btn">Clear</button>
+                </div>
+            </div>
+            <!-- Output Section -->
+            <div class="io-section">
+                <div class="io-output-header">
+                    <label class="io-label">Output</label>
+                    <button id="io-output-clear" class="io-clear-btn">Clear</button>
+                </div>
+                <div id="io-output" class="io-output-display"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Input Required Modal -->
+    <div class="modal-overlay" id="input-modal">
+        <div class="modal-content modal-sm">
+            <div class="modal-header">
+                <span class="modal-title">Input Required</span>
+            </div>
+            <div class="modal-body">
+                <p>The INP instruction requires input. Please enter a character:</p>
+                <input type="text" id="input-modal-field" class="io-input-field" maxlength="1" autofocus>
+                <div class="modal-actions">
+                    <button id="input-modal-submit" class="btn btn-primary">Submit</button>
+                    <button id="input-modal-cancel" class="btn btn-outline">Cancel Execution</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/utils/helpers.js"></script>
+    <script src="js/core/memory.js"></script>
+    <script src="js/core/assembler.js"></script>
+    <script src="js/core/cpu.js"></script>
+    <script src="js/domImpl.js"></script>
+</body>
+
+</html>

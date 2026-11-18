@@ -161,7 +161,20 @@ class CPU {
                             // Indirect: AR <- M[AR] (pointer word contains address)
                             const ptrWord = this.memory.read(this.AR);
                             const ptrVal = parseInt(ptrWord, 16);
-                            const newAR = (ptrVal & 0xFFF).toString(16).toUpperCase().padStart(3, '0');
+                            let newAR = (ptrVal & 0xFFF).toString(16).toUpperCase().padStart(3, '0');
+
+                            // If M[newAR] is empty, check if pointer was given in decimal (e.g. DEC 106 for address 106)
+                            if (this.memory.read(newAR) === "0000") {
+                                const decAsHex = ptrVal.toString(10).toUpperCase().padStart(3, '0');
+                                const decAddrVal = parseInt(decAsHex, 16);
+                                if (!isNaN(decAddrVal) && decAddrVal < 4096) {
+                                    if (this.memory.read(decAsHex) !== "0000" ||
+                                        (typeof SimState !== 'undefined' && SimState.currentUsageMap && SimState.currentUsageMap[decAddrVal])) {
+                                        newAR = decAsHex;
+                                    }
+                                }
+                            }
+
                             const oldAR = this.AR;
                             this.AR = newAR;
                             msg = `T3: Indirect: AR ← M[${oldAR}] = ${this.AR}`;

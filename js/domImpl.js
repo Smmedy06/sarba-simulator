@@ -22,7 +22,7 @@ const SimState = {
 
 // Memory view state
 const memState = {
-    format: 'hex',
+    format: 'dec',
     showAll: false,
     filterAddr: null
 };
@@ -471,10 +471,9 @@ function updateMemoryView() {
     }
 
     const formatValue = (hex) => {
-        const val = parseInt(hex, 16);
         switch (memState.format) {
-            case 'dec': return val.toString();
-            case 'bin': return val.toString(2).padStart(16, '0');
+            case 'dec': return Utils.hexToSigned(hex).toString();
+            case 'bin': return parseInt(hex, 16).toString(2).padStart(16, '0');
             default: return hex;
         }
     };
@@ -759,6 +758,7 @@ window.addEventListener('DOMContentLoaded', () => {
             btn.classList.add('active');
             memState.format = btn.getAttribute('data-fmt');
             updateMemoryView();
+            updateUI();
         });
     });
 

@@ -362,14 +362,32 @@ function recordTrace(res) {
 function updateUI(res = { msg: 'Ready' }) {
     if (!elements.regDR) return;
 
-    elements.regDR.textContent = SimState.cpu.DR;
-    elements.regAC.textContent = SimState.cpu.AC;
-    elements.regAR.textContent = SimState.cpu.AR;
-    elements.regPC.textContent = SimState.cpu.PC;
-    elements.regIR.textContent = SimState.cpu.IR;
-    elements.regTR.textContent = SimState.cpu.TR;
-    elements.regINPR.textContent = SimState.cpu.INPR;
-    elements.regOUTR.textContent = SimState.cpu.OUTR;
+    // Format register value based on current memory view format
+    const fmt = memState.format;
+    const fmtReg16 = (hex) => {
+        if (fmt === 'dec') return Utils.hexToSigned(hex).toString();
+        if (fmt === 'bin') return parseInt(hex, 16).toString(2).padStart(16, '0');
+        return hex;
+    };
+    const fmtReg12 = (hex) => {
+        if (fmt === 'dec') return parseInt(hex, 16).toString();
+        if (fmt === 'bin') return parseInt(hex, 16).toString(2).padStart(12, '0');
+        return hex;
+    };
+    const fmtReg8 = (hex) => {
+        if (fmt === 'dec') return parseInt(hex, 16).toString();
+        if (fmt === 'bin') return parseInt(hex, 16).toString(2).padStart(8, '0');
+        return hex;
+    };
+
+    elements.regDR.textContent = fmtReg16(SimState.cpu.DR);
+    elements.regAC.textContent = fmtReg16(SimState.cpu.AC);
+    elements.regAR.textContent = fmtReg12(SimState.cpu.AR);
+    elements.regPC.textContent = fmtReg12(SimState.cpu.PC);
+    elements.regIR.textContent = fmtReg16(SimState.cpu.IR);
+    elements.regTR.textContent = fmtReg16(SimState.cpu.TR);
+    elements.regINPR.textContent = fmtReg8(SimState.cpu.INPR);
+    elements.regOUTR.textContent = fmtReg8(SimState.cpu.OUTR);
 
     updateFlag(elements.flagE, SimState.cpu.E);
     updateFlag(elements.flagI, SimState.cpu.I);

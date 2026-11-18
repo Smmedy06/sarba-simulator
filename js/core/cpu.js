@@ -137,7 +137,7 @@ class CPU {
                 break;
 
             case 2: // T2: Decode -> AR <- IR(0-11), I <- IR(15)
-                {
+                // {
                     let irVal = parseInt(this.IR, 16);
                     this.AR = (irVal & 0x0FFF).toString(16).toUpperCase().padStart(3, '0');
                     this.I = (irVal & 0x8000) !== 0; // Bit 15
@@ -149,7 +149,7 @@ class CPU {
                 break;
 
             case 3: // T3: Indirect addressing or RRI/IO execution
-                {
+                // {
                     let irVal = parseInt(this.IR, 16);
                     let opcode = (irVal & 0x7000) >> 12;
                     let type = 'MRI';
@@ -183,45 +183,6 @@ class CPU {
                         this.checkInterrupt();
                     }
                 }
-                break;
-                {
-                    let irVal = parseInt(this.IR, 16);
-                    let opcode = (irVal & 0x7000) >> 12;
-                    let type = 'MRI';
-                    if (opcode === 7) type = this.I ? 'IO' : 'RRI';
-
-                    if (type === 'MRI') {
-                        if (this.I) {
-                            // Indirect: AR <- M[AR]
-                            let ptr = this.memory.read(this.AR);
-                            let oldAR = this.AR;
-                            this.AR = ptr.slice(-3);
-                            msg = `T3: Indirect: AR ← M[${oldAR}] = ${this.AR}`;
-                            this.SC = 4;
-                        } else {
-                            msg = `T3: Direct addressing (no change)`;
-                            this.SC = 4;
-                        }
-                    } else {
-                        // RRI or IO -> Execute at T3
-                        let result = this.executeRegisterOrIO(type);
-                        msg = result.msg;
-                        
-                        // Check if waiting for input - don't reset SC so we can re-execute
-                        if (result.waitInput) {
-                            this.waitingForInput = true;
-                            // Keep SC at 3 so INP instruction is re-executed when input is available
-                            return { state: 'WaitInput', msg: msg, waitInput: true };
-                        }
-                        
-                        this.SC = 0; // End of instruction
-                        
-                        // Check for interrupt at end of instruction cycle
-                        // R flag is set if IEN=1 and (FGI=1 or FGO=1)
-                        this.checkInterrupt();
-                    }
-                }
-                break;
 
             case 4: // T4: Execute MRI (first phase)
                 msg = this.executeMRI_T4();
@@ -480,7 +441,7 @@ class CPU {
                 break;
 
             case 1: // ADD
-                {
+                // {
                     let sum = Utils.addHex(this.AC, this.DR);
                     this.AC = sum.hex;
                     this.E = sum.carry;

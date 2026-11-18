@@ -124,6 +124,15 @@ class CPU {
                 if (this.checkInterrupt()) {
                     return this.executeInterruptCycle();
                 }
+
+                // If PC runs into a data section (e.g. user omitted HLT or placed data before HLT), halt safely
+                const pcInt = parseInt(this.PC, 16);
+                if (typeof SimState !== 'undefined' && SimState.currentUsageMap && SimState.currentUsageMap[pcInt] === 'data') {
+                    this.S = false;
+                    this.status = "Stopped";
+                    return { state: 'Halt', msg: 'HLT: Program reached data section' };
+                }
+
                 this.AR = this.PC;
                 msg = `T0: AR ← PC (${this.PC})`;
                 this.SC = 1;

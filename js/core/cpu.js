@@ -157,6 +157,41 @@ class CPU {
 
                     if (type === 'MRI') {
                         if (this.I) {
+                            // Indirect: AR <- M[AR] (pointer word contains address)
+                            const ptrWord = this.memory.read(this.AR);
+                            const ptrVal = parseInt(ptrWord, 16);
+                            const newAR = (ptrVal & 0xFFF).toString(16).toUpperCase().padStart(3, '0');
+                            const oldAR = this.AR;
+                            this.AR = newAR;
+                            msg = `T3: Indirect: AR ← M[${oldAR}] = ${this.AR}`;
+                            this.SC = 4;
+                        } else {
+                            msg = `T3: Direct addressing (no change)`;
+                            this.SC = 4;
+                        }
+                    } else {
+                        // RRI or IO -> Execute at T3
+                        let result = this.executeRegisterOrIO(type);
+                        msg = result.msg;
+
+                        if (result.waitInput) {
+                            this.waitingForInput = true;
+                            return { state: 'WaitInput', msg: msg, waitInput: true };
+                        }
+
+                        this.SC = 0;
+                        this.checkInterrupt();
+                    }
+                }
+                break;
+                {
+                    let irVal = parseInt(this.IR, 16);
+                    let opcode = (irVal & 0x7000) >> 12;
+                    let type = 'MRI';
+                    if (opcode === 7) type = this.I ? 'IO' : 'RRI';
+
+                    if (type === 'MRI') {
+                        if (this.I) {
                             // Indirect: AR <- M[AR]
                             let ptr = this.memory.read(this.AR);
                             let oldAR = this.AR;

@@ -136,8 +136,9 @@ class CPU {
                 this.SC = 2;
                 break;
 
+
             case 2: // T2: Decode -> AR <- IR(0-11), I <- IR(15)
-                // {
+                {
                     let irVal = parseInt(this.IR, 16);
                     this.AR = (irVal & 0x0FFF).toString(16).toUpperCase().padStart(3, '0');
                     this.I = (irVal & 0x8000) !== 0; // Bit 15
@@ -149,11 +150,11 @@ class CPU {
                 break;
 
             case 3: // T3: Indirect addressing or RRI/IO execution
-                // {
-                    let irVal = parseInt(this.IR, 16);
-                    let opcode = (irVal & 0x7000) >> 12;
+                {
+                    let irVal2 = parseInt(this.IR, 16);
+                    let opcode2 = (irVal2 & 0x7000) >> 12;
                     let type = 'MRI';
-                    if (opcode === 7) type = this.I ? 'IO' : 'RRI';
+                    if (opcode2 === 7) type = this.I ? 'IO' : 'RRI';
 
                     if (type === 'MRI') {
                         if (this.I) {
@@ -183,6 +184,7 @@ class CPU {
                         this.checkInterrupt();
                     }
                 }
+                break;
 
             case 4: // T4: Execute MRI (first phase)
                 msg = this.executeMRI_T4();
@@ -441,7 +443,7 @@ class CPU {
                 break;
 
             case 1: // ADD
-                // {
+                {
                     let sum = Utils.addHex(this.AC, this.DR);
                     this.AC = sum.hex;
                     this.E = sum.carry;
